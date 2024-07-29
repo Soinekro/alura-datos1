@@ -15,11 +15,11 @@ df_banco = pd.read_csv("data/german_credit.csv", sep=",")
 # print(df_banco.info())
 # print(df_banco.describe())
 # print(df_banco.account_check_status.value_counts())
-columnas = list(df_banco.select_dtypes(include=["object"]).columns)
-for columna in columnas:
-    print(f"el nombre de la columna : {columna}")
-    print(list(df_banco[f"{columna}"].value_counts().index))
-    print("\n")
+# columnas = list(df_banco.select_dtypes(include=["object"]).columns)
+# for columna in columnas:
+#     print(f"el nombre de la columna : {columna}")
+#     print(list(df_banco[f"{columna}"].value_counts().index))
+#     print("\n")
 
 # print(df_banco.columns)
 
@@ -118,7 +118,105 @@ def procesar_datos():
 
     m = {"yes": 1, "no": 0}
     df_banco["foreign_worker"] = df_banco["foreign_worker"].map(m)
+
+
 print(df_banco.head())
 procesar_datos()
-print('\n \n \n')
+print("\n \n \n")
+# print(df_banco.head())
+variables_discretas = [
+    "personal_status_sex",
+    "age",
+    "duration_in_month",
+    "credit_amount",
+    "default",
+]
+
+# print(df_banco[variables_discretas].tail()) #opuesto a head
+
+
+def feature_engineering():
+    global df_banco
+    dic_sexo = {2: 1, 5: 1, 1: 0, 3: 0, 4: 0}
+    dic_est_civil = {3: 1, 5: 1, 1: 0, 2: 0, 4: 0}
+    df_banco["sexo"] = df_banco["personal_status_sex"].map(dic_sexo)
+    df_banco["estado_civil"] = df_banco["personal_status_sex"].map(dic_est_civil)
+    df_banco["rango_edad"] = pd.cut(
+        x=df_banco["age"], bins=[18, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6]
+    ).astype(int)
+    df_banco["rango_plazos_credito"] = pd.cut(
+        x=df_banco["duration_in_month"],
+        bins=[1, 12, 24, 36, 48, 60, 72],
+        labels=[1, 2, 3, 4, 5, 6],
+    ).astype(int)
+    df_banco["rango_valor_credito"] = pd.cut(
+        x=df_banco["credit_amount"],
+        bins=[
+            1,
+            1000,
+            2000,
+            3000,
+            4000,
+            5000,
+            6000,
+            7000,
+            8000,
+            9000,
+            10000,
+            11000,
+            12000,
+            13000,
+            14000,
+            15000,
+            16000,
+            17000,
+            18000,
+            19000,
+            20000,
+        ],
+        labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    ).astype(int)
+    df_banco = df_banco.drop(
+        columns=["personal_status_sex", "age", "duration_in_month", "credit_amount"]
+    )
+
+
+feature_engineering()
 print(df_banco.head())
+print(df_banco.describe())
+
+#histograma para la variable edad y la variable sexo
+# plt.figure(figsize=(10, 5))
+# sns.histplot(df_banco["rango_edad"], kde=True)
+# plt.xlabel("Edad")
+# plt.ylabel("Frecuencia")
+# plt.title("Histograma de la variable edad")
+# plt.show()
+
+# plt.figure(figsize=(10, 5))
+# sns.histplot(df_banco["sexo"], kde=True)
+# plt.xlabel("sexo")
+# plt.ylabel("Frecuencia")
+# plt.title("Histograma de la variable sexo")
+# plt.show()
+
+def analisis_exploratorio():
+    global df_banco
+    histogramas = ['sexo','estado_civil','rango_plazos_credito','rango_edad','default']
+    lista_histogramas = list(enumerate(histogramas)) #enumera la lista
+    plt.figure(figsize = (15,8)) #tamaño de la figura
+    plt.title('Histogramas') #titulo
+    for i in lista_histogramas:
+        plt.subplot(3, 2, i[0]+1) #3 filas, 2 columnas, i[0]+1 es la posicion
+        sns.countplot(x = i[1], data = df_banco) #i[1] es el nombre de la columna
+        plt.xlabel(i[1], fontsize=20) #nombre de la columna
+        plt.ylabel('Total', fontsize=20) #nombre del eje y
+    #     plt.xticks(fontsize=20)
+    plt.show()
+
+analisis_exploratorio()
+#1 .analizar los datos de las distribuciones 
+# e identificar si hay un valor o registros que no se deben considerar en el analisis
+#2. investigar que es un y como crear un mapa de calor
+#hacer un mapa de calor para ver la correlacion entre las variables numericas
+# crear conclusiones para cada grafico
