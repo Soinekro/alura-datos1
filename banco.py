@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", None)
 
 global df_banco, resultados
-df_banco = pd.read_csv("data/german_credit.csv", sep=",")
+df_banco = pd.read_csv("data/banco.csv", sep=",")
 # print(df_banco.head())
 # print(df_banco.info())
 # print(df_banco.describe())
